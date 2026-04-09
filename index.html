@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>DEEP PROBE v1.3 - Telenet Node 214.37.12.9</title>
+	<style>
+		body {
+			margin: 0;
+			padding: 20px;
+			background: #000;
+			color: #ffb000;
+			font-family: "IBM VGA9x8", monospace;
+			font-size: 14px;
+			line-height: 1.25;
+			overflow: hidden;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+		}
+
+		body::after {
+			content: "";
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			pointer-events: none;
+			background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 3px);
+		}
+
+		#terminal {
+			width: 100%;
+			max-width: 820px;
+			height: 560px;
+			border: 2px solid #ffb000;
+			background: #000;
+			padding: 16px;
+			overflow-y: auto;
+			position: relative;
+			box-shadow: 0 0 12px rgba(255, 176, 0, 0.25);
+		}
+
+		.line {
+			margin: 2px 0;
+			white-space: pre;
+			text-shadow: 0 0 4px currentColor;
+		}
+
+		.prompt {
+			color: #00d0d0;
+		}
+
+		.input {
+			color: #ff9a00;
+		}
+
+		.error {
+			color: #ff4040;
+		}
+
+		.success {
+			color: #ffe066;
+		}
+
+		.scan {
+			color: #ff6a00;
+		}
+
+		.header {
+			color: #00d0d0;
+			font-weight: bold;
+		}
+
+		.cyan {
+			color: #00d0d0;
+		}
+
+		.yellow {
+			color: #ffe066;
+		}
+
+		.white {
+			color: #fff;
+		}
+
+		.grey {
+			color: #777;
+		}
+
+		.lime {
+			color: #0f0;
+		}
+
+		.magenta {
+			color: #f0f;
+		}
+
+		.rainbow {
+			animation: rainbow 0.8s linear infinite;
+		}
+
+		@keyframes rainbow {
+			0% {
+				color: #f00
+			}
+
+			25% {
+				color: #ff0
+			}
+
+			50% {
+				color: #0f0
+			}
+
+			75% {
+				color: #0ff
+			}
+
+			100% {
+				color: #f0f
+			}
+		}
+
+		#input-line {
+			display: flex;
+			color: #ff9a00;
+		}
+
+		#cursor {
+			display: inline-block;
+			width: 8px;
+			height: 16px;
+			background: #ff9a00;
+			margin-left: 2px;
+			animation: blink 1s step-end infinite;
+		}
+
+		@keyframes blink {
+			50% {
+				opacity: 0;
+			}
+		}
+
+		#modal {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.96);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			z-index: 100;
+		}
+
+		#modal-content {
+			width: 740px;
+			border: 2px solid #ffb000;
+			background: #000;
+			padding: 25px;
+			max-height: 82vh;
+			overflow-y: auto;
+			box-shadow: 0 0 20px rgba(255, 176, 0, 0.2);
+		}
+
+		#modal-content button {
+			background: #000;
+			color: #ffb000;
+			border: 2px solid #ffb000;
+			padding: 10px 30px;
+			font-family: inherit;
+			cursor: pointer;
+			margin-top: 20px;
+			transition: all 0.15s ease;
+		}
+
+		#modal-content button:hover {
+			background: #ffb000;
+			color: #000;
+		}
+
+		#status {
+			position: fixed;
+			bottom: 18px;
+			right: 24px;
+			background: rgba(0, 0, 0, 0.92);
+			border: 1px solid #ffb000;
+			padding: 10px 14px;
+			font-size: 13px;
+			line-height: 1.4;
+			box-shadow: 0 0 10px rgba(255, 176, 0, 0.2);
+		}
+
+		#status span {
+			font-variant-numeric: tabular-nums;
+		}
+	</style>
+</head>
+
+<body>
+
+	<div id="terminal"></div>
+
+	<div id="status">
+		Transmitted Credits: <span id="pen">0</span> / <span id="target">10000</span><br>
+		<span id="transBar" style="color:#0f0; font-family: monospace;"></span> Payoff [<span id="payoff">0</span>]<br>
+		Buffer: <span id="buffer">0</span><br>
+		<span id="traceContainer" style="color:#f00; display:none;">
+			<span id="tracebar"></span> TRACE[<span id="timer">2:00</span>]
+		</span>
+	</div>
+
+	<div id="modal">
+		<div id="modal-content">
+			<div class="header">FROM: INNER_CIRCLE_NODE_414</div>
+			<div class="header">TO: CONSOLE_COWBOY_87</div>
+			<div class="header">SUBJ: DEEPCORE PROBE v1.3 — Telenet Billing Mainframe</div>
+			<br>
+			<p>[COMPTELL MAIN CORE] SYSTEM ACCESS GRANTED.</p>
+			<p>The CompTel Main Core routes billions in credit balances between all nodes in their global infrastructure.
+				That new DeepCore rig you're using can (almost) invisibly delay internal rebalancing transactions just
+				long enough for you to cut in and drain the credits. If you know how.</p>
+			<p>Pay attention. You owe us a lot of money and you don't want to make a mistake</p>
+			<p class="white">***********************************************************</p>
+
+			<p>[<span class="white">RUN</span>] — DeepCore PROBE reroutes 6 credit-data vectors to you, attempting to
+				decrypt them in the process. Some vectors (<span class="yellow">YELLOW</span>/<span
+					class="white">WHITE</span>) are decrypted, ready to be <span class="white">LOK</span>.ed and
+				drained. Partially decrypted
+				vectors are greyed out.</p>
+			<p>[<span class="white">LOK</span>] — Drain credits from decrypted vectors to your local buffer (input their
+				ID#s separated by spaces). If you manage to <span class="white">LOK</span> all valid vectors the
+				mainframe will auto-authorize
+				overages with 6 fresh vectors.</p>
+			<p>DeepCore occasionally infers data routes from sets of 3 packets (<span class="lime">GREEN</span>). We
+				will pay you handsomely for this data so <span class="white">LOK</span> these as well. <span
+					class="lime">YOU MUST <span class="white">LOK</span> THIS DATA SEPARATELY</span> FROM DECRYPTED
+				DATA. Any other colored vector is CLASSIFIED, LOK
+				them for a huge reward.</p>
+			<p>[<span class="white">REQ</span>] Request replacement vectors from stream when there are none to <span
+					class="white">LOK</span>.
+				WARNING: If you ever receive back ONLY encrypted vectors internal security will be alerted, your buffer
+				cleared, connection terminated, and we dock you that amount.</p>
+			<p>[<span class="white">EXF</span>] — Exfiltrate everything in your credit buffer through the outgoing agent
+				as payback for the hardware. <span class="white">EXF</span> transactions must meet DeepCore system
+				minimums, buffer can not get <span class="white">EXF</span>'d
+				before that.</p>
+
+			<p>[<span class="white">HELP</span>] type this to get a list of all commands</p>
+			<p class="white">***********************************************************</p>
+
+			<p>CompTelPMC begins triangulating you the moment you EXF any credits. 10 minutes until they locate you and
+				dispatch someone to redact you. </p>
+
+			<p>I'd hurry up.</p>
+
+
+			<button id="connect-btn">CONNECT TO NODE 214.37.12.9 — INITIATE DEEP PROBE</button>
+		</div>
+	</div>
+
+	<script type="module">
+		import { createGame, roll, take, bank, isHotHand, getRollCounters, getTakeCounters, addMessage } from './game.js';
+		import { CONFIG } from './config.js';
+
+		let game = createGame();
+		let term = document.getElementById('terminal');
+		let currentInput = '';
+		let inputLineDiv = null;
+
+		let traceStarted = false;
+		let traceElapsed = 0;
+		let traceInterval = null;
+		const TRACE_LIMIT_SECONDS = 120; // 2:00 default
+
+		const penEl = document.getElementById('pen');
+		const targetEl = document.getElementById('target');
+		const bufferEl = document.getElementById('buffer');
+		const modal = document.getElementById('modal');
+		const connectBtn = document.getElementById('connect-btn');
+
+		// ---------------- UTILS ----------------
+		function print(line, cls = '') {
+			const div = document.createElement('div');
+			div.className = 'line ' + cls;
+			div.textContent = line;
+			term.appendChild(div);
+			term.scrollTop = term.scrollHeight;
+		}
+
+		function updateLiveInput() {
+			if (inputLineDiv) inputLineDiv.remove();
+			inputLineDiv = document.createElement('div');
+			inputLineDiv.id = 'input-line';
+			inputLineDiv.innerHTML = '<span class="prompt">&gt; </span><span id="input-text"></span><span id="cursor"></span>';
+			term.appendChild(inputLineDiv);
+			document.getElementById('input-text').textContent = currentInput;
+			term.scrollTop = term.scrollHeight;
+		}
+
+		function prompt() {
+			currentInput = '';
+			updateLiveInput();
+		}
+
+		const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+		function beep(freq = 800, duration = 50, type = 'sine', vol = 0.2) {
+			const osc = audioCtx.createOscillator();
+			const gain = audioCtx.createGain();
+			osc.type = type; osc.frequency.value = freq; gain.gain.value = vol;
+			osc.connect(gain).connect(audioCtx.destination);
+			osc.start(); setTimeout(() => osc.stop(), duration);
+		}
+
+		let carrierOsc = null;
+		let carrierGain = null;
+
+		function startGrumble() {
+			if (carrierOsc) return;
+			carrierOsc = audioCtx.createOscillator();
+			carrierGain = audioCtx.createGain();
+			carrierOsc.type = 'square';
+			carrierOsc.frequency.setValueAtTime(280, audioCtx.currentTime);
+			carrierGain.gain.value = 0.07;
+			carrierOsc.connect(carrierGain).connect(audioCtx.destination);
+			carrierOsc.start();
+		}
+
+		function stopGrumble() {
+			if (carrierOsc) {
+				carrierOsc.stop();
+				carrierOsc = null;
+				carrierGain = null;
+			}
+		}
+
+		function showProgressBar(text, duration = 900) {
+			return new Promise(resolve => {
+				startGrumble();
+				const div = document.createElement('div');
+				div.className = 'line scan';
+				div.textContent = text + ' [';
+				term.appendChild(div);
+				term.scrollTop = term.scrollHeight;
+
+				let step = 0;
+				const barLength = 20;
+				const totalSteps = Math.ceil(duration / 50);
+				const interval = setInterval(() => {
+					step++;
+					const filled = Math.floor((step / totalSteps) * barLength);
+					div.textContent = text + ' [' + '█'.repeat(filled) + '░'.repeat(barLength - filled) + ']';
+					term.scrollTop = term.scrollHeight;
+					if (step >= totalSteps) {
+						clearInterval(interval);
+						div.textContent = text + ' [COMPLETE]';
+						stopGrumble();
+						setTimeout(resolve, 200);
+					}
+				}, 50);
+			});
+		}
+
+		async function typeLine(text, className = '', delay = 12) {
+			return new Promise(resolve => {
+				const div = document.createElement('div');
+				div.className = `line ${className}`;
+				term.appendChild(div);
+				let i = 0;
+				const interval = setInterval(() => {
+					if (i < text.length) {
+						div.textContent += text.charAt(i); i++;
+						term.scrollTop = term.scrollHeight;
+					} else {
+						clearInterval(interval); resolve();
+					}
+				}, delay);
+			});
+		}
+
+		function getVectorClass(face, freqMap) {
+			const count = freqMap.get(face) || 0;
+			if (count === 6) return 'rainbow';
+			if (count === 3) return 'lime';
+			if (freqMap.size === 6 && [...freqMap.keys()].sort((a, b) => a - b).join('') === '123456') return 'magenta';
+			if (face === 1) return 'yellow';
+			if (face === 5) return 'white';
+			return 'grey';
+		}
+
+		// ---------------- UI FUNCTIONS ----------------
+		function updateUI() {
+			let transmitted = game.state.totalScore || 0;
+			const target = CONFIG.target || 10000;
+
+			penEl.textContent = transmitted;
+			targetEl.textContent = target;
+			bufferEl.textContent = game.state.handScore || 0;
+
+			// Safe progress calculation - never allow negative repeat count
+			const ratio = transmitted / target;
+			const progress = Math.max(0, Math.min(30, Math.floor(ratio * 30)));
+
+			const filled = '*'.repeat(progress);
+			const empty = '_'.repeat(30 - progress);
+			document.getElementById('transBar').textContent = '|' + filled + empty + '|';
+			document.getElementById('payoff').textContent = transmitted;
+		}
+
+		function startTrace() {
+			traceStarted = true;
+			traceElapsed = 0;
+
+			// modem dial-up sound
+			beep(2200, 40, 'sine', 0.15);
+			setTimeout(() => beep(1800, 40, 'sine', 0.15), 60);
+			setTimeout(() => beep(1400, 40, 'sine', 0.15), 120);
+			setTimeout(() => beep(1000, 40, 'sine', 0.15), 180);
+			setTimeout(() => beep(800, 80, 'square', 0.2), 260);
+			setTimeout(() => beep(1200, 80, 'sine', 0.25), 360);
+
+			print('Hostile Trace Detected - 2:00 to failure', 'error');
+			document.getElementById('traceContainer').style.display = 'inline';
+			updateTraceUI();
+
+			if (traceInterval) clearInterval(traceInterval);
+			traceInterval = setInterval(() => {
+				traceElapsed++;
+
+				// 5-minute and 1-minute warnings
+				if (traceElapsed === TRACE_LIMIT_SECONDS - 300) emitWarning(5);   // 5:00 left
+				if (traceElapsed === TRACE_LIMIT_SECONDS - 60)  emitWarning(1);   // 1:00 left
+
+				if (traceElapsed >= TRACE_LIMIT_SECONDS) {
+					clearInterval(traceInterval);
+					triggerTimeUp();
+					return;
+				}
+				updateTraceUI();
+			}, 1000);
+		}
+
+		function updateTraceUI() {
+			const remaining = TRACE_LIMIT_SECONDS - traceElapsed;
+			const minutes = Math.floor(remaining / 60);
+			const seconds = remaining % 60;
+			document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+			const progress = Math.floor((traceElapsed / TRACE_LIMIT_SECONDS) * 30);
+			const filled = '*'.repeat(progress);
+			const empty = '_'.repeat(30 - progress);
+			document.getElementById('tracebar').textContent = '|' + filled + empty + '|';
+		}
+		function emitWarning(minutes) {
+			const remaining = TRACE_LIMIT_SECONDS - traceElapsed;
+			const minLeft = Math.floor(remaining / 60);
+			print(`***** ${minLeft}:${(remaining % 60).toString().padStart(2, '0')} UNTIL NODE UNMASKING // FORCE DISCONNECT *****`, 'error');
+		}
+
+		async function triggerTimeUp() {
+			print('');
+			print('WARNING: CONNECTION COMPROMISED', 'error');
+			print('DEEPCORE SELF-DESTRUCT SEQUENCE INITIATED', 'error');
+
+			await new Promise(r => setTimeout(r, 400));
+
+			const nukeLines = [
+				'PURGING DEEPCORE MEMORY BANKS...',
+				'ERASING VECTOR CACHE...',
+				'TERMINATING ENCRYPTION TUNNELS...',
+				'WIPING SESSION BUFFER...',
+				'SHUTTING DOWN PACKET SNIFFER...',
+				'DESTROYING BACKDOOR TUNNEL...',
+				'FINAL WIPE: ALL TRACES REMOVED'
+			];
+
+			for (const line of nukeLines) {
+				print(line, 'error');
+				await new Promise(r => setTimeout(r, 280));
+			}
+
+			print('');
+			print('*** DEEPCORE RIG COMPROMISED - SYSTEM OFFLINE ***', 'error');
+			print('');
+			print('FROM: INNER_CIRCLE_NODE_414', 'cyan');
+			print('Time\'s up. CompTel redacted you.', '');
+			print('You still owe us. Reconnect and don\'t waste our time.', '');
+			print('');
+
+			const reconnectBtn = document.createElement('button');
+			reconnectBtn.textContent = 'RECONNECT TO NODE 214.37.12.9';
+			reconnectBtn.style.cssText = 'background:#000; color:#ffb000; border:2px solid #ffb000; padding:10px 30px; font-family:Courier New,monospace; font-size:16px; cursor:pointer; margin-top:15px;';
+			reconnectBtn.onclick = () => location.reload();
+			term.appendChild(reconnectBtn);
+			term.scrollTop = term.scrollHeight;
+		}
+
+		function displayVectors() {
+			print('ISOLATED VECTORS:', 'cyan');
+			const freqMap = new Map();
+			game.state.dice.forEach(face => {
+				freqMap.set(face, (freqMap.get(face) || 0) + 1);
+			});
+
+			// Per-die scoring info using the same rules as engine.evaluateHand
+			const dieInfo = new Array(game.state.dice.length).fill(null);
+
+			CONFIG.scoring.forEach(cfg => {
+				const face = cfg.face;
+				const count = freqMap.get(face) || 0;
+				if (count === 0) return;
+
+				let setCount = 0;
+				let soloCount = 0;
+				let setScore = 0;
+				let soloScore = cfg.solo;
+
+				if (count === 6) {
+					setCount = 6;
+					setScore = 5000;           // engine special rule
+				} else if (count >= 3) {
+					setCount = 3;
+					setScore = cfg.set3;
+					soloCount = count - 3;
+				} else {
+					soloCount = count;
+				}
+
+				// Indices of this face in the exact order they appear in the roll
+				const faceIndices = [];
+				for (let i = 0; i < game.state.dice.length; i++) {
+					if (game.state.dice[i] === face) faceIndices.push(i);
+				}
+
+				// First N dice get the set treatment
+				for (let k = 0; k < setCount; k++) {
+					const idx = faceIndices[k];
+					dieInfo[idx] = {
+						scoreLabel: `[${setScore}]`,
+						cls: (count === 6) ? 'rainbow' : 'lime'
+					};
+				}
+
+				// Remaining dice get solo treatment
+				for (let k = setCount; k < setCount + soloCount; k++) {
+					const idx = faceIndices[k];
+					dieInfo[idx] = {
+						scoreLabel: (soloScore > 0) ? `[${soloScore}]` : '',
+						cls: (face === 1) ? 'yellow' : (face === 5) ? 'white' : 'grey'
+					};
+				}
+			});
+
+			// Render
+			game.state.dice.forEach((face, idx) => {
+				const hexVal = (face * 100).toString(16).toUpperCase().padStart(4, '0');
+				let label = `Vector[${idx + 1}] 0x${hexVal}`;
+
+				const info = dieInfo[idx];
+				if (info && info.scoreLabel) label += ` ${info.scoreLabel}`;
+
+				const cls = info ? info.cls : 'grey';
+				print(`  ${label}`, cls);
+			});
+		}
+
+		// ---------------- INPUT ----------------
+		async function handleInput(input) {
+			if (inputLineDiv) { inputLineDiv.remove(); inputLineDiv = null; }
+			const cmd = input.trim().toUpperCase();
+			print('> ' + cmd, 'input');
+
+			if (cmd === 'HELP' || cmd === '?') {
+				print('AVAILABLE: RUN, REQ, LOK <#>, EXF, STATUS, CLEAR, QUIT');
+				return prompt();
+			}
+
+			if (cmd === 'RUN') {
+				// Runtime charge
+				if (game.state.totalScore < 100) {
+					print('Insufficient Credits, Increasing Balance -(100)CR', 'error');
+				} else {
+					print('Runtime Charge -(100)CR', 'grey');
+				}
+				game.state.totalScore -= 100;
+
+				await showProgressBar('DEEPCORE ACCESSING STREAMS...');
+				beep(900, 120, 'square', 0.15);
+				print('VECTOR STREAMS SNIFFED', 'scan');
+
+				const preservedTotal = game.state.totalScore;
+				game = createGame();
+				game.state.totalScore = preservedTotal;
+				game = roll(game);
+
+				if (game.state.dice.length === 0) {
+					beep(200, 600, 'sawtooth', 0.3);
+					print('*** CARRIER TRACE DETECTED - SESSION TERMINATED ***', 'error');
+				} else {
+					displayVectors();
+				}
+
+				updateUI();
+				prompt();
+				return;
+			}
+
+			if (cmd === 'REQ') {
+				if (!game.canRoll) {
+					print('You must take at least one die before <REQ>.', 'error');
+					return prompt();
+				}
+
+				await showProgressBar('RERUNNING DECRYPTION...');
+				beep(900, 120, 'square', 0.15);
+				print('VECTOR STREAMS SNIFFED', 'scan');
+
+				const currentBuffer = game.state.handScore;   // capture risked buffer BEFORE roll
+				game = roll(game);
+
+				if (game.state.dice.length === 0) {
+					const lost = currentBuffer;
+					beep(200, 600, 'sawtooth', 0.3);
+					print('*** CARRIER TRACE DETECTED - SESSION TERMINATED ***', 'error');
+					if (lost > 0) {
+						game.state.totalScore = Math.max(0, game.state.totalScore - lost);
+						print(`Buffer confiscated - ${lost} credits deducted.`, 'error');
+					}
+				} else {
+					displayVectors();
+				}
+
+				updateUI();
+				return prompt();
+			}
+
+			if (cmd.startsWith('LOK ')) {
+				const ids = cmd.slice(4).trim().split(/\s+/).map(n => parseInt(n) - 1).filter(n => !isNaN(n));
+				if (ids.length === 0) { print('No vectors selected', 'error'); return prompt(); }
+				const oldBuffer = game.state.handScore;
+				game = take(game, ids);
+				const scored = game.state.handScore - oldBuffer;
+				beep(1600, 40);
+				beep(2200, 60);
+				print(`Extracted ${scored} credits. CURRENT BUFFER: ${game.state.handScore}.`);
+				if (isHotHand(game)) {
+					// 1980s style cheery 8-note arpeggio
+					beep(1200, 60, 'sine', 0.25);
+					beep(1500, 60, 'sine', 0.25);
+					beep(1800, 60, 'sine', 0.25);
+					beep(2200, 80, 'sine', 0.3);
+					setTimeout(() => beep(2400, 60, 'sine', 0.25), 80);
+					setTimeout(() => beep(2800, 60, 'sine', 0.25), 160);
+					setTimeout(() => beep(3200, 60, 'sine', 0.25), 240);
+					// setTimeout(() => beep(3600, 100, 'sine', 0.35), 320);
+
+					print('AUTHORIZATION OVERRIDE - NEW VECTORS READY', 'success');
+				}
+				displayVectors();
+				updateUI();
+				return prompt();
+			}
+
+			if (cmd === 'EXF') {
+				const oldBuffer = game.state.handScore;
+				game = bank(game);
+				if (oldBuffer >= CONFIG.minBank) {
+					// Rewarding 1980s-style success fanfare
+					beep(800, 80, 'sine', 0.3);
+					setTimeout(() => beep(1200, 80, 'sine', 0.3), 80);
+					setTimeout(() => beep(1600, 80, 'sine', 0.3), 160);
+					setTimeout(() => beep(2000, 120, 'sine', 0.35), 240);
+					setTimeout(() => beep(2400, 160, 'triangle', 0.4), 180);
+					setTimeout(() => beep(2800, 200, 'sine', 0.45), 240);
+
+					print(`BUFFER TRANSMITTED THROUGH OUTGOING AGENT. +${oldBuffer} credits → Balance now ${game.state.totalScore}`, 'success');
+
+					if (!traceStarted) startTrace();
+				} else {
+					print(`EXF rejected - minimum ${CONFIG.minBank} credits required. Current buffer: ${oldBuffer}`, 'error');
+				}
+				updateUI();
+				return prompt();
+			}
+
+			if (cmd === 'STATUS') {
+				print(`Total Score: ${game.state.totalScore}`, 'cyan');
+				print(`Current Buffer: ${game.state.handScore}`, 'yellow');
+				print(`Remaining Dice: ${game.state.dice.length}`, 'yellow');
+				if (game.state.dice.length > 0) displayVectors();
+				return prompt();
+			}
+
+			if (cmd === 'CLEAR') { term.innerHTML = ''; return prompt(); }
+			if (cmd === 'QUIT') { print('*** CONNECTION TERMINATED ***', 'error'); return; }
+
+			print('UNKNOWN COMMAND', 'error'); prompt();
+		}
+
+		// ---------------- EVENT LISTENERS ----------------
+		document.addEventListener('keydown', e => {
+			if (modal.style.display !== 'none') return;
+			if (e.key === 'Enter') {
+				if (currentInput.trim()) handleInput(currentInput);
+				else prompt();
+			}
+			else if (e.key === 'Backspace') {
+				currentInput = currentInput.slice(0, -1);
+				updateLiveInput();
+			}
+			else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+				currentInput += e.key;
+				updateLiveInput();
+			}
+		});
+
+		// ---------------- START GAME ----------------
+		async function bootSequence() {
+			await typeLine('========================================', '', 8);
+			await typeLine('     DEEP PROBE v1.3   -   1985-07-14', 'header', 10);
+			await typeLine('     Telenet Node 214.37.12.9   CONNECTED', 'header', 10);
+			await typeLine('========================================', '', 8);
+			await new Promise(r => setTimeout(r, 90));
+			await typeLine('CARRIER SIGNAL ACQUIRED... MODEM HANDSHAKE COMPLETE', 'cyan', 12);
+			await typeLine('SYNCHRONIZING WITH MAINFRAME SWITCH...', '', 15);
+			await typeLine('BYPASSING FRONT-END AUTHENTICATION LAYER...', '', 15);
+			await typeLine('ESTABLISHING SECURE BACKDOOR TUNNEL...', 'yellow', 12);
+			await new Promise(r => setTimeout(r, 110));
+			await typeLine('WARNING: Federal trace detection active on all trunks.', 'error');
+			await typeLine('Goal: Reach 100% penetration before trace completes.', '');
+			await new Promise(r => setTimeout(r, 80));
+			await typeLine('Type HELP for commands.', 'cyan');
+			prompt();
+			updateUI();
+		}
+
+		async function startGame() {
+			modal.style.display = 'none';
+			await bootSequence();
+		}
+
+		connectBtn.addEventListener('click', startGame);
+	</script>
+
+</body>
+
+</html>
